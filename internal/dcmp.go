@@ -1,4 +1,3 @@
-// internal/dcmp.go is main logic for `dcmp`.
 package internal
 
 import (
@@ -14,12 +13,9 @@ var HEADER = color.New(color.FgBlack).Add(color.Bold)
 var DELETED = color.New(color.FgRed)
 var ADDED = color.New(color.FgGreen)
 
-// LCS table
 func getLcsTable(bf []string, af []string) [][]int {
 	bfLen, afLen := len(bf), len(af)
-	// lt rows as bf rows
 	lt := make([][]int, bfLen+1)
-	// lt cols as af rows
 	for i := range lt {
 		lt[i] = make([]int, afLen+1)
 	}
@@ -77,7 +73,6 @@ func printChange(bui int, bmi int, bf []string, aui int, ami int, af []string) {
 	for i := aui - 1; i < ami-1; i++ {
 		act = append(act, ">"+af[i])
 	}
-	// Change
 	HEADER.Printf("%d-%dc%d-%d\n", bui, bmi-1, aui, ami-1)
 	DELETED.Printf("%s\n", strings.Join(bct, "\n"))
 	fmt.Printf("------------\n")
@@ -147,7 +142,6 @@ func getDiffInfo(bf []string, af []string) {
 }
 
 func Execute(bfpath string, afpath string) error {
-	// file open
 	bff, err := os.Open(bfpath)
 	if err != nil {
 		return err
@@ -159,7 +153,6 @@ func Execute(bfpath string, afpath string) error {
 	}
 	defer aff.Close()
 
-	// scan
 	var bflines []string
 	bfs := bufio.NewScanner(bff)
 	for bfs.Scan() {
