@@ -1,7 +1,4 @@
-/*
-Copyright © 2025 NAME HERE <EMAIL ADDRESS>
-
-*/
+// dcmpメインプロセス.
 package main
 
 import "github.com/prs-watch/dcmp/cmd"
