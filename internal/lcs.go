@@ -1,4 +1,4 @@
-// LCSによるC/A/D検知モジュール.
+// LCSモジュール.
 package internal
 
 /*

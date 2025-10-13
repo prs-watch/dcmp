@@ -1,11 +1,27 @@
 // `dcmp` のコアモジュール.
 package internal
 
+import "errors"
+
 /*
 LCSベースに検出したC/A/Dを判定の上Printする.
 */
-func printResult(bf []string, af []string) {
+func printResult(bf []string, af []string, briefFlag bool, identicalFlag bool) error {
 	pairs := GetLcsPairs(bf, af)
+
+	// 完全一致か判定
+	if len(pairs) == len(bf) && len(pairs) == len(af) {
+		if identicalFlag {
+			handleIdentical()
+		}
+		return nil
+	} else {
+		// -q, --briefの場合出力の上エラー返却
+		if briefFlag {
+			handleBrief()
+			return errors.New("")
+		}
+	}
 
 	// 未処理行. 初期は1行目からスタート.
 	bui, aui := 1, 1
@@ -50,6 +66,8 @@ func printResult(bf []string, af []string) {
 	default:
 		// 一致行は処理無し.
 	}
+
+	return nil
 }
 
 /*
@@ -90,19 +108,36 @@ func handleAdd(aui int, ami int, af []string) {
 }
 
 /*
-実行エントリポイント. 2ファイルパスをinputに差分情報をPrintする.
+-q, --brief時に差分が検知された場合のPrint.
 */
-func Execute(bfpath string, afpath string) error {
-	bflines, err := GetLines(bfpath)
+func handleBrief() {
+	PrintBrief()
+}
+
+/*
+-s, --report-identical-files時に同一ファイルであった場合のPrint.
+*/
+func handleIdentical() {
+	PrintIdentical()
+}
+
+/*
+モジュールエントリポイント. 2ファイルパスをinputに差分情報をPrintする.
+*/
+func Execute(bfpath string, afpath string, briefFlag bool, identicalFlag bool, ignoreBlankFlag bool) error {
+	bflines, err := GetLines(bfpath, ignoreBlankFlag)
 	if err != nil {
 		return err
 	}
-	aflines, err := GetLines(afpath)
+	aflines, err := GetLines(afpath, ignoreBlankFlag)
 	if err != nil {
 		return err
 	}
 
-	printResult(bflines, aflines)
+	err = printResult(bflines, aflines, briefFlag, identicalFlag)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
