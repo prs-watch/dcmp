@@ -1,11 +1,24 @@
 // `dcmp` のコアモジュール.
 package internal
 
+import "errors"
+
 /*
 LCSベースに検出したC/A/Dを判定の上Printする.
 */
-func printResult(bf []string, af []string) {
+func printResult(bf []string, af []string, briefFlag bool) error {
 	pairs := GetLcsPairs(bf, af)
+
+	// 完全一致か判定
+	if len(pairs) == len(bf) && len(pairs) == len(af) {
+		return nil
+	} else {
+		// -q, --briefの場合出力の上エラー返却
+		if briefFlag {
+			handleBrief()
+			return errors.New("")
+		}
+	}
 
 	// 未処理行. 初期は1行目からスタート.
 	bui, aui := 1, 1
@@ -50,6 +63,8 @@ func printResult(bf []string, af []string) {
 	default:
 		// 一致行は処理無し.
 	}
+
+	return nil
 }
 
 /*
@@ -90,9 +105,16 @@ func handleAdd(aui int, ami int, af []string) {
 }
 
 /*
-実行エントリポイント. 2ファイルパスをinputに差分情報をPrintする.
+-q, --brief時に差分が検知された場合のPrint.
 */
-func Execute(bfpath string, afpath string) error {
+func handleBrief() {
+	PrintBrief()
+}
+
+/*
+モジュールエントリポイント. 2ファイルパスをinputに差分情報をPrintする.
+*/
+func Execute(bfpath string, afpath string, briefFlag bool) error {
 	bflines, err := GetLines(bfpath)
 	if err != nil {
 		return err
@@ -102,7 +124,10 @@ func Execute(bfpath string, afpath string) error {
 		return err
 	}
 
-	printResult(bflines, aflines)
+	err = printResult(bflines, aflines, briefFlag)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }

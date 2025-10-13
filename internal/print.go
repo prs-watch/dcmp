@@ -42,3 +42,10 @@ func PrintDelete(buis int, buie int, bct []string) {
 	BEFORE.Printf("%s\n", strings.Join(bct, "\n"))
 	fmt.Printf("\n")
 }
+
+/*
+-q, --briefオプションで差分が検知出来た場合のPrint定義.
+*/
+func PrintBrief() {
+	fmt.Printf("Files differ\n")
+}
