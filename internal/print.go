@@ -49,3 +49,10 @@ func PrintDelete(buis int, buie int, bct []string) {
 func PrintBrief() {
 	fmt.Printf("Files differ\n")
 }
+
+/*
+-s, --report-identical-filesオプションでファイルが同一の場合のPrint定義.
+*/
+func PrintIdentical() {
+	fmt.Printf("Files are identical\n")
+}

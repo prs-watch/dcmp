@@ -8,7 +8,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var briefFlag bool // -q, --brief
+var briefFlag bool     // -q, --brief
+var identicalFlag bool // -s, --report-identical-files
 
 var rootCmd = &cobra.Command{
 	Use:           "dcmp [path] [path] [flags]",
@@ -18,7 +19,7 @@ var rootCmd = &cobra.Command{
 	SilenceUsage:  true,
 	Args:          cobra.ExactArgs(2),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		err := internal.Execute(args[0], args[1], briefFlag)
+		err := internal.Execute(args[0], args[1], briefFlag, identicalFlag)
 		if err != nil {
 			return err
 		}
@@ -41,5 +42,7 @@ func Execute() {
 */
 func init() {
 	// -q, --brief
-	rootCmd.Flags().BoolVarP(&briefFlag, "brief", "q", false, "差分の有無のみ出力します.")
+	rootCmd.Flags().BoolVarP(&briefFlag, "brief", "q", false, "ファイル差分が存在する場合のみ標準出力.")
+	// -s, --report-identical-files
+	rootCmd.Flags().BoolVarP(&identicalFlag, "report-identical-files", "s", false, "ファイルが同一の場合のみ標準出力.")
 }

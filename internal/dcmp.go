@@ -6,11 +6,14 @@ import "errors"
 /*
 LCSベースに検出したC/A/Dを判定の上Printする.
 */
-func printResult(bf []string, af []string, briefFlag bool) error {
+func printResult(bf []string, af []string, briefFlag bool, identicalFlag bool) error {
 	pairs := GetLcsPairs(bf, af)
 
 	// 完全一致か判定
 	if len(pairs) == len(bf) && len(pairs) == len(af) {
+		if identicalFlag {
+			handleIdentical()
+		}
 		return nil
 	} else {
 		// -q, --briefの場合出力の上エラー返却
@@ -112,9 +115,16 @@ func handleBrief() {
 }
 
 /*
+-s, --report-identical-files時に同一ファイルであった場合のPrint.
+*/
+func handleIdentical() {
+	PrintIdentical()
+}
+
+/*
 モジュールエントリポイント. 2ファイルパスをinputに差分情報をPrintする.
 */
-func Execute(bfpath string, afpath string, briefFlag bool) error {
+func Execute(bfpath string, afpath string, briefFlag bool, identicalFlag bool) error {
 	bflines, err := GetLines(bfpath)
 	if err != nil {
 		return err
@@ -124,7 +134,7 @@ func Execute(bfpath string, afpath string, briefFlag bool) error {
 		return err
 	}
 
-	err = printResult(bflines, aflines, briefFlag)
+	err = printResult(bflines, aflines, briefFlag, identicalFlag)
 	if err != nil {
 		return err
 	}
