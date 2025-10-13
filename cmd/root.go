@@ -8,8 +8,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var briefFlag bool     // -q, --brief
-var identicalFlag bool // -s, --report-identical-files
+var briefFlag bool       // -q, --brief
+var identicalFlag bool   // -s, --report-identical-files
+var ignoreBlankFlag bool // -B, --ignore-blank-lines
 
 var rootCmd = &cobra.Command{
 	Use:           "dcmp [path] [path] [flags]",
@@ -19,7 +20,7 @@ var rootCmd = &cobra.Command{
 	SilenceUsage:  true,
 	Args:          cobra.ExactArgs(2),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		err := internal.Execute(args[0], args[1], briefFlag, identicalFlag)
+		err := internal.Execute(args[0], args[1], briefFlag, identicalFlag, ignoreBlankFlag)
 		if err != nil {
 			return err
 		}
@@ -45,4 +46,6 @@ func init() {
 	rootCmd.Flags().BoolVarP(&briefFlag, "brief", "q", false, "ファイル差分が存在する場合のみ標準出力.")
 	// -s, --report-identical-files
 	rootCmd.Flags().BoolVarP(&identicalFlag, "report-identical-files", "s", false, "ファイルが同一の場合のみ標準出力.")
+	// -B, --ignore-blank-lines
+	rootCmd.Flags().BoolVarP(&ignoreBlankFlag, "ignore-blank-lines", "B", false, "空行を無視してファイル比較を実行.")
 }
