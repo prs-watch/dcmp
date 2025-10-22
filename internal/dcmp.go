@@ -124,12 +124,12 @@ func handleIdentical() {
 /*
 モジュールエントリポイント. 2ファイルパスをinputに差分情報をPrintする.
 */
-func Execute(bfpath string, afpath string, briefFlag bool, identicalFlag bool, ignoreBlankFlag bool, ignoreCaseFlag bool) error {
-	bflines, err := GetLines(bfpath, ignoreBlankFlag, ignoreCaseFlag)
+func Execute(bfpath string, afpath string, briefFlag bool, identicalFlag bool, ignoreBlankFlag bool, ignoreCaseFlag bool, ignoreSpaceFlag bool) error {
+	bflines, err := GetLines(bfpath, ignoreBlankFlag, ignoreCaseFlag, ignoreSpaceFlag)
 	if err != nil {
 		return err
 	}
-	aflines, err := GetLines(afpath, ignoreBlankFlag, ignoreCaseFlag)
+	aflines, err := GetLines(afpath, ignoreBlankFlag, ignoreCaseFlag, ignoreSpaceFlag)
 	if err != nil {
 		return err
 	}

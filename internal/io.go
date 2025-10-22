@@ -3,13 +3,14 @@ package internal
 import (
 	"bufio"
 	"os"
+	"regexp"
 	"strings"
 )
 
 /*
 ファイル内容をロードし[]stringとして返却.
 */
-func GetLines(path string, ignoreBlankFlag bool, ignoreCaseFlag bool) ([]string, error) {
+func GetLines(path string, ignoreBlankFlag bool, ignoreCaseFlag bool, ignoreSpaceFlag bool) ([]string, error) {
 	f, err := os.Open(path)
 	if err != nil {
 		return nil, err
@@ -24,12 +25,22 @@ func GetLines(path string, ignoreBlankFlag bool, ignoreCaseFlag bool) ([]string,
 		if ignoreBlankFlag && fs.Text() == "" {
 			continue
 		}
+
+		// appendする文字列.
+		line := fs.Text()
 		// case check
 		if ignoreCaseFlag {
-			lines = append(lines, strings.ToUpper(fs.Text()))
-		} else {
-			lines = append(lines, fs.Text())
+			line = strings.ToUpper(line)
 		}
+
+		// check space
+		if ignoreSpaceFlag {
+			line = strings.TrimSpace(line)
+			re := regexp.MustCompile(`\s+`)
+			line = re.ReplaceAllString(line, " ")
+		}
+
+		lines = append(lines, line)
 	}
 
 	return lines, nil
