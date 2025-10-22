@@ -14,6 +14,7 @@ var ignoreBlankFlag bool    // -B, --ignore-blank-lines
 var ignoreCaseFlag bool     // -i, --ignore-case
 var ignoreSpaceFlag bool    // -b, --ignore-space-change
 var ignoreAllSpaceFlag bool // -w, --ignore-all-space
+var colorMode string        // --color
 
 var rootCmd = &cobra.Command{
 	Use:           "dcmp [path] [path] [flags]",
@@ -23,7 +24,7 @@ var rootCmd = &cobra.Command{
 	SilenceUsage:  true,
 	Args:          cobra.ExactArgs(2),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		err := internal.Execute(args[0], args[1], briefFlag, identicalFlag, ignoreBlankFlag, ignoreCaseFlag, ignoreSpaceFlag, ignoreAllSpaceFlag)
+		err := internal.Execute(args[0], args[1], briefFlag, identicalFlag, ignoreBlankFlag, ignoreCaseFlag, ignoreSpaceFlag, ignoreAllSpaceFlag, colorMode)
 		if err != nil {
 			return err
 		}
@@ -57,4 +58,6 @@ func init() {
 	rootCmd.Flags().BoolVarP(&ignoreSpaceFlag, "ignore-space-change", "b", false, "空白文字を無視してファイル比較を実行.")
 	// -w, --ignore-all-space
 	rootCmd.Flags().BoolVarP(&ignoreAllSpaceFlag, "ignore-all-space", "w", false, "全ての空白文字を無視してファイル比較を実行.")
+	// --color
+	rootCmd.Flags().StringVarP(&colorMode, "color", "", "auto", "色付き出力.auto/always/neverから選択.デフォルトはauto.")
 }

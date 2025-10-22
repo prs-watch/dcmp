@@ -3,9 +3,11 @@ package internal
 
 import (
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/fatih/color"
+	"github.com/mattn/go-isatty"
 )
 
 var (
@@ -15,9 +17,29 @@ var (
 )
 
 /*
+Print時のスタイル制御モジュール.
+*/
+func ApplyColorMode(colorMode string) error {
+	switch colorMode {
+	case "auto":
+		if !isatty.IsTerminal(os.Stdout.Fd()) {
+			color.NoColor = true
+		}
+	case "never":
+		color.NoColor = true
+	case "always":
+		color.NoColor = false
+	default:
+		return fmt.Errorf("invalid color mode: %s", colorMode)
+	}
+	return nil
+}
+
+/*
 C/A/DでChangeとして検知された情報のPrint定義.
 */
 func PrintChange(bls int, ble int, bct []string, als int, ale int, act []string) {
+
 	HEADER.Printf("%d-%dc%d-%d\n", bls, ble, als, ale)
 	BEFORE.Printf("%s\n", strings.Join(bct, "\n"))
 	fmt.Printf("------------\n")
