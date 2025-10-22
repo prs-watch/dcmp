@@ -6,7 +6,14 @@ import "errors"
 /*
 LCSベースに検出したC/A/Dを判定の上Printする.
 */
-func printResult(bf []string, af []string, briefFlag bool, identicalFlag bool) error {
+func printResult(bf []string, af []string, briefFlag bool, identicalFlag bool, colorMode string) error {
+	// Print時のcolorModeの適用
+	err := ApplyColorMode(colorMode)
+	if err != nil {
+		return err
+	}
+
+	// LCSペアの取得
 	pairs := GetLcsPairs(bf, af)
 
 	// 完全一致か判定
@@ -56,6 +63,7 @@ func printResult(bf []string, af []string, briefFlag bool, identicalFlag bool) e
 	bEnd, aEnd := len(bf), len(af)
 	isbu := bui <= bEnd
 	isau := aui <= aEnd
+
 	switch {
 	case isbu && isau:
 		handleChange(bui, bEnd+1, bf, aui, aEnd+1, af)
@@ -124,17 +132,17 @@ func handleIdentical() {
 /*
 モジュールエントリポイント. 2ファイルパスをinputに差分情報をPrintする.
 */
-func Execute(bfpath string, afpath string, briefFlag bool, identicalFlag bool, ignoreBlankFlag bool) error {
-	bflines, err := GetLines(bfpath, ignoreBlankFlag)
+func Execute(bfpath string, afpath string, briefFlag bool, identicalFlag bool, ignoreBlankFlag bool, ignoreCaseFlag bool, ignoreSpaceFlag bool, ignoreAllSpaceFlag bool, colorMode string) error {
+	bflines, err := GetLines(bfpath, ignoreBlankFlag, ignoreCaseFlag, ignoreSpaceFlag, ignoreAllSpaceFlag)
 	if err != nil {
 		return err
 	}
-	aflines, err := GetLines(afpath, ignoreBlankFlag)
+	aflines, err := GetLines(afpath, ignoreBlankFlag, ignoreCaseFlag, ignoreSpaceFlag, ignoreAllSpaceFlag)
 	if err != nil {
 		return err
 	}
 
-	err = printResult(bflines, aflines, briefFlag, identicalFlag)
+	err = printResult(bflines, aflines, briefFlag, identicalFlag, colorMode)
 	if err != nil {
 		return err
 	}
