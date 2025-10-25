@@ -10,38 +10,59 @@ import (
 /*
 ファイル内容をロードし[]stringとして返却.
 */
-func GetLines(path string, ignoreBlankFlag bool, ignoreCaseFlag bool, ignoreSpaceFlag bool, ignoreAllSpaceFlag bool, ignoreCrFlag bool) ([]string, error) {
+func GetLines(path string, ignoreBlankFlag bool, ignoreCaseFlag bool, ignoreSpaceFlag bool, ignoreAllSpaceFlag bool, ignoreCrFlag bool, ignoreMatchingLines []string) ([]string, error) {
 	f, err := os.Open(path)
 	if err != nil {
 		return nil, err
 	}
 	defer f.Close()
 
+	// prepare for scanning
 	var lines []string
 	fs := bufio.NewScanner(f)
 	fs.Buffer(make([]byte, 1024), 1024*1024)
+	patterns := []*regexp.Regexp{}
+	for _, pattern := range ignoreMatchingLines {
+		re, err := regexp.Compile(pattern)
+		if err != nil {
+			return nil, err
+		}
+		patterns = append(patterns, re)
+	}
+
 	for fs.Scan() {
-		// blank check
-		if ignoreBlankFlag && fs.Text() == "" {
+		line := fs.Text()
+		ignoreLine := false
+
+		// ignore specific regex
+		for _, pattern := range patterns {
+			if pattern.MatchString(line) {
+				ignoreLine = true
+				break
+			}
+		}
+		if ignoreLine {
 			continue
 		}
 
-		// appendする文字列.
-		line := fs.Text()
+		// ignore blank
+		if ignoreBlankFlag && line == "" {
+			continue
+		}
 
-		// case check
+		// ignore case diff
 		if ignoreCaseFlag {
 			line = strings.ToUpper(line)
 		}
 
-		// check space
+		// ignore space
 		re := regexp.MustCompile(`\s+`)
 		if ignoreSpaceFlag {
 			line = strings.TrimSpace(line)
 			line = re.ReplaceAllString(line, " ")
 		}
 
-		// ignore all space
+		// ignore all spaces
 		if ignoreAllSpaceFlag {
 			line = re.ReplaceAllString(line, "")
 		}

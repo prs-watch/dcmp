@@ -8,14 +8,15 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var briefFlag bool          // -q, --brief
-var identicalFlag bool      // -s, --report-identical-files
-var ignoreBlankFlag bool    // -B, --ignore-blank-lines
-var ignoreCaseFlag bool     // -i, --ignore-case
-var ignoreSpaceFlag bool    // -b, --ignore-space-change
-var ignoreAllSpaceFlag bool // -w, --ignore-all-space
-var colorMode string        // --color
-var ignoreCrFlag bool       // --strip-trailing-cr
+var briefFlag bool               // -q, --brief
+var identicalFlag bool           // -s, --report-identical-files
+var ignoreBlankFlag bool         // -B, --ignore-blank-lines
+var ignoreCaseFlag bool          // -i, --ignore-case
+var ignoreSpaceFlag bool         // -b, --ignore-space-change
+var ignoreAllSpaceFlag bool      // -w, --ignore-all-space
+var colorMode string             // --color
+var ignoreCrFlag bool            // --strip-trailing-cr
+var ignoreMatchingLines []string // -I, --ignore-matching-lines
 
 var rootCmd = &cobra.Command{
 	Use:           "dcmp [path] [path] [flags]",
@@ -25,7 +26,7 @@ var rootCmd = &cobra.Command{
 	SilenceUsage:  true,
 	Args:          cobra.ExactArgs(2),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		err := internal.Execute(args[0], args[1], briefFlag, identicalFlag, ignoreBlankFlag, ignoreCaseFlag, ignoreSpaceFlag, ignoreAllSpaceFlag, colorMode, ignoreCrFlag)
+		err := internal.Execute(args[0], args[1], briefFlag, identicalFlag, ignoreBlankFlag, ignoreCaseFlag, ignoreSpaceFlag, ignoreAllSpaceFlag, colorMode, ignoreCrFlag, ignoreMatchingLines)
 		if err != nil {
 			return err
 		}
@@ -63,4 +64,6 @@ func init() {
 	rootCmd.Flags().StringVarP(&colorMode, "color", "", "auto", "色付き出力.auto/always/neverから選択.デフォルトはauto.")
 	// --strip-trailing-cr
 	rootCmd.Flags().BoolVarP(&ignoreCrFlag, "strip-trailing-cr", "", false, "末尾のCRを無視してファイル比較を実行.")
+	// -I, --ignore-matching-lines
+	rootCmd.Flags().StringArrayVarP(&ignoreMatchingLines, "ignore-matching-lines", "I", []string{}, "指定した正規表現に一致する行を無視してファイル比較を実行.")
 }
