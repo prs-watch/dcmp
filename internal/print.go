@@ -1,4 +1,4 @@
-// Print時のスタイル制御モジュール.
+// Style control module for printing.
 package internal
 
 import (
@@ -11,13 +11,17 @@ import (
 )
 
 var (
-	HEADER = color.New(color.FgBlack).Add(color.Bold) // ヘッダスタイル
-	BEFORE = color.New(color.FgRed)                   // Beforeスタイル
-	AFTER  = color.New(color.FgGreen)                 // Afterスタイル
+	HEADER = color.New(color.FgBlack).Add(color.Bold) // Header style
+	BEFORE = color.New(color.FgRed)                   // Before style
+	AFTER  = color.New(color.FgGreen)                 // After style
 )
 
 /*
-Print時のスタイル制御モジュール.
+ApplyColorMode configures the color output mode for printing.
+Parameters:
+  - colorMode: "auto" (terminal detection), "never" (no color), or "always" (force color)
+
+Returns an error if an invalid color mode is specified.
 */
 func ApplyColorMode(colorMode string) error {
 	switch colorMode {
@@ -36,7 +40,14 @@ func ApplyColorMode(colorMode string) error {
 }
 
 /*
-C/A/DでChangeとして検知された情報のPrint定義.
+PrintChange outputs Change information detected in C/A/D analysis.
+Parameters:
+  - bls: Before line start
+  - ble: Before line end
+  - bct: Before content lines
+  - als: After line start
+  - ale: After line end
+  - act: After content lines
 */
 func PrintChange(bls int, ble int, bct []string, als int, ale int, act []string) {
 
@@ -48,7 +59,11 @@ func PrintChange(bls int, ble int, bct []string, als int, ale int, act []string)
 }
 
 /*
-C/A/DでAddとして検知された情報のPrint定義.
+PrintAdd outputs Add information detected in C/A/D analysis.
+Parameters:
+  - auis: After unprocessed index start
+  - auie: After unprocessed index end
+  - act: After content lines
 */
 func PrintAdd(auis int, auie int, act []string) {
 	HEADER.Printf("0a%d-%d\n", auis, auie)
@@ -57,7 +72,11 @@ func PrintAdd(auis int, auie int, act []string) {
 }
 
 /*
-C/A/DでDeleteとして検知された情報のPrint定義.
+PrintDelete outputs Delete information detected in C/A/D analysis.
+Parameters:
+  - buis: Before unprocessed index start
+  - buie: Before unprocessed index end
+  - bct: Before content lines
 */
 func PrintDelete(buis int, buie int, bct []string) {
 	HEADER.Printf("%d-%dd0\n", buis, buie)
@@ -66,14 +85,14 @@ func PrintDelete(buis int, buie int, bct []string) {
 }
 
 /*
--q, --briefオプションで差分が検知出来た場合のPrint定義.
+PrintBrief outputs a message when differences are detected with -q, --brief option.
 */
 func PrintBrief() {
 	fmt.Printf("Files differ\n")
 }
 
 /*
--s, --report-identical-filesオプションでファイルが同一の場合のPrint定義.
+PrintIdentical outputs a message when files are identical with -s, --report-identical-files option.
 */
 func PrintIdentical() {
 	fmt.Printf("Files are identical\n")

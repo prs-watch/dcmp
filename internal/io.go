@@ -1,3 +1,4 @@
+// File I/O operations module.
 package internal
 
 import (
@@ -8,7 +9,18 @@ import (
 )
 
 /*
-ファイル内容をロードし[]stringとして返却.
+GetLines loads file contents and returns them as a slice of strings with optional filters applied.
+Parameters:
+  - path: File path to read
+  - ignoreBlankFlag: If true, skip blank lines
+  - ignoreCaseFlag: If true, convert all text to uppercase
+  - ignoreSpaceFlag: If true, normalize whitespace (trim and collapse to single space)
+  - ignoreAllSpaceFlag: If true, remove all whitespace
+  - ignoreCrFlag: If true, strip trailing carriage returns
+  - ignoreMatchingLines: Regex patterns for lines to skip
+  - expandTabsFlag: If true, replace tabs with 8 spaces
+
+Returns a slice of processed lines and any error encountered.
 */
 func GetLines(
 	path string,
@@ -26,7 +38,7 @@ func GetLines(
 	}
 	defer f.Close()
 
-	// prepare for scanning
+	// Prepare for scanning
 	var lines []string
 	fs := bufio.NewScanner(f)
 	fs.Buffer(make([]byte, 1024), 1024*1024)
@@ -43,7 +55,7 @@ func GetLines(
 		line := fs.Text()
 		ignoreLine := false
 
-		// ignore specific regex
+		// Ignore specific regex
 		for _, pattern := range patterns {
 			if pattern.MatchString(line) {
 				ignoreLine = true
@@ -54,34 +66,34 @@ func GetLines(
 			continue
 		}
 
-		// ignore blank
+		// Ignore blank
 		if ignoreBlankFlag && line == "" {
 			continue
 		}
 
-		// ignore case diff
+		// Ignore case diff
 		if ignoreCaseFlag {
 			line = strings.ToUpper(line)
 		}
 
-		// ignore space
+		// Ignore space
 		re := regexp.MustCompile(`\s+`)
 		if ignoreSpaceFlag {
 			line = strings.TrimSpace(line)
 			line = re.ReplaceAllString(line, " ")
 		}
 
-		// ignore all spaces
+		// Ignore all spaces
 		if ignoreAllSpaceFlag {
 			line = re.ReplaceAllString(line, "")
 		}
 
-		// ignore CR
+		// Ignore CR
 		if ignoreCrFlag {
 			line = strings.TrimRight(line, "\r")
 		}
 
-		// replace tabs to spaces
+		// Replace tabs to spaces
 		if expandTabsFlag {
 			line = strings.ReplaceAll(line, "\t", "        ")
 		}
