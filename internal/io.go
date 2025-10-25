@@ -10,7 +10,16 @@ import (
 /*
 ファイル内容をロードし[]stringとして返却.
 */
-func GetLines(path string, ignoreBlankFlag bool, ignoreCaseFlag bool, ignoreSpaceFlag bool, ignoreAllSpaceFlag bool, ignoreCrFlag bool, ignoreMatchingLines []string) ([]string, error) {
+func GetLines(
+	path string,
+	ignoreBlankFlag bool,
+	ignoreCaseFlag bool,
+	ignoreSpaceFlag bool,
+	ignoreAllSpaceFlag bool,
+	ignoreCrFlag bool,
+	ignoreMatchingLines []string,
+	expandTabsFlag bool,
+) ([]string, error) {
 	f, err := os.Open(path)
 	if err != nil {
 		return nil, err
@@ -70,6 +79,11 @@ func GetLines(path string, ignoreBlankFlag bool, ignoreCaseFlag bool, ignoreSpac
 		// ignore CR
 		if ignoreCrFlag {
 			line = strings.TrimRight(line, "\r")
+		}
+
+		// replace tabs to spaces
+		if expandTabsFlag {
+			line = strings.ReplaceAll(line, "\t", "        ")
 		}
 
 		lines = append(lines, line)

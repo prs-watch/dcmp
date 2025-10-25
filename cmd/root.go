@@ -17,6 +17,7 @@ var ignoreAllSpaceFlag bool      // -w, --ignore-all-space
 var colorMode string             // --color
 var ignoreCrFlag bool            // --strip-trailing-cr
 var ignoreMatchingLines []string // -I, --ignore-matching-lines
+var expandTabsFlag bool          // -t, --expand-tabs
 
 var rootCmd = &cobra.Command{
 	Use:           "dcmp [path] [path] [flags]",
@@ -26,7 +27,20 @@ var rootCmd = &cobra.Command{
 	SilenceUsage:  true,
 	Args:          cobra.ExactArgs(2),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		err := internal.Execute(args[0], args[1], briefFlag, identicalFlag, ignoreBlankFlag, ignoreCaseFlag, ignoreSpaceFlag, ignoreAllSpaceFlag, colorMode, ignoreCrFlag, ignoreMatchingLines)
+		err := internal.Execute(
+			args[0],
+			args[1],
+			briefFlag,
+			identicalFlag,
+			ignoreBlankFlag,
+			ignoreCaseFlag,
+			ignoreSpaceFlag,
+			ignoreAllSpaceFlag,
+			colorMode,
+			ignoreCrFlag,
+			ignoreMatchingLines,
+			expandTabsFlag,
+		)
 		if err != nil {
 			return err
 		}
@@ -61,9 +75,11 @@ func init() {
 	// -w, --ignore-all-space
 	rootCmd.Flags().BoolVarP(&ignoreAllSpaceFlag, "ignore-all-space", "w", false, "全ての空白文字を無視してファイル比較を実行.")
 	// --color
-	rootCmd.Flags().StringVarP(&colorMode, "color", "", "auto", "色付き出力.auto/always/neverから選択.デフォルトはauto.")
+	rootCmd.Flags().StringVarP(&colorMode, "color", "", "auto", "auto/always/neverから色付き出力を制御する. デフォルトはauto.")
 	// --strip-trailing-cr
 	rootCmd.Flags().BoolVarP(&ignoreCrFlag, "strip-trailing-cr", "", false, "末尾のCRを無視してファイル比較を実行.")
 	// -I, --ignore-matching-lines
 	rootCmd.Flags().StringArrayVarP(&ignoreMatchingLines, "ignore-matching-lines", "I", []string{}, "指定した正規表現に一致する行を無視してファイル比較を実行.")
+	// -t, --expand-tabs
+	rootCmd.Flags().BoolVarP(&expandTabsFlag, "expand-tabs", "t", false, "Tabをスペースに置換した上で比較.")
 }
