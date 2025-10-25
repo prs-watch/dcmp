@@ -1,4 +1,4 @@
-// Cobraコマンドルートモジュール.
+// Cobra command root module.
 package cmd
 
 import (
@@ -49,7 +49,7 @@ var rootCmd = &cobra.Command{
 }
 
 /*
-Cobraエントリポイント.
+Cobra entry point.
 */
 func Execute() {
 	err := rootCmd.Execute()
@@ -59,27 +59,27 @@ func Execute() {
 }
 
 /*
-コマンドに付与するフラグを定義する.
+Define flags to be attached to the command.
 */
 func init() {
 	// -q, --brief
-	rootCmd.Flags().BoolVarP(&briefFlag, "brief", "q", false, "ファイル差分が存在する場合のみ標準出力.")
+	rootCmd.Flags().BoolVarP(&briefFlag, "brief", "q", false, "Output to stdout only when file differences exist.")
 	// -s, --report-identical-files
-	rootCmd.Flags().BoolVarP(&identicalFlag, "report-identical-files", "s", false, "ファイルが同一の場合のみ標準出力.")
+	rootCmd.Flags().BoolVarP(&identicalFlag, "report-identical-files", "s", false, "Output to stdout only when files are identical.")
 	// -B, --ignore-blank-lines
-	rootCmd.Flags().BoolVarP(&ignoreBlankFlag, "ignore-blank-lines", "B", false, "空行を無視してファイル比較を実行.")
+	rootCmd.Flags().BoolVarP(&ignoreBlankFlag, "ignore-blank-lines", "B", false, "Ignore blank lines when comparing files.")
 	// -i, --ignore-case
-	rootCmd.Flags().BoolVarP(&ignoreCaseFlag, "ignore-case", "i", false, "大文字小文字を無視してファイル比較を実行.")
+	rootCmd.Flags().BoolVarP(&ignoreCaseFlag, "ignore-case", "i", false, "Ignore case differences when comparing files.")
 	// -b, --ignore-space-change
-	rootCmd.Flags().BoolVarP(&ignoreSpaceFlag, "ignore-space-change", "b", false, "空白文字を無視してファイル比較を実行.")
+	rootCmd.Flags().BoolVarP(&ignoreSpaceFlag, "ignore-space-change", "b", false, "Ignore whitespace changes when comparing files.")
 	// -w, --ignore-all-space
-	rootCmd.Flags().BoolVarP(&ignoreAllSpaceFlag, "ignore-all-space", "w", false, "全ての空白文字を無視してファイル比較を実行.")
+	rootCmd.Flags().BoolVarP(&ignoreAllSpaceFlag, "ignore-all-space", "w", false, "Ignore all whitespace when comparing files.")
 	// --color
-	rootCmd.Flags().StringVarP(&colorMode, "color", "", "auto", "auto/always/neverから色付き出力を制御する. デフォルトはauto.")
+	rootCmd.Flags().StringVarP(&colorMode, "color", "", "auto", "Control colored output with auto/always/never. Default is auto.")
 	// --strip-trailing-cr
-	rootCmd.Flags().BoolVarP(&ignoreCrFlag, "strip-trailing-cr", "", false, "末尾のCRを無視してファイル比較を実行.")
+	rootCmd.Flags().BoolVarP(&ignoreCrFlag, "strip-trailing-cr", "", false, "Ignore trailing CR when comparing files.")
 	// -I, --ignore-matching-lines
-	rootCmd.Flags().StringArrayVarP(&ignoreMatchingLines, "ignore-matching-lines", "I", []string{}, "指定した正規表現に一致する行を無視してファイル比較を実行.")
+	rootCmd.Flags().StringArrayVarP(&ignoreMatchingLines, "ignore-matching-lines", "I", []string{}, "Ignore lines matching the specified regex when comparing files.")
 	// -t, --expand-tabs
-	rootCmd.Flags().BoolVarP(&expandTabsFlag, "expand-tabs", "t", false, "Tabをスペースに置換した上で比較.")
+	rootCmd.Flags().BoolVarP(&expandTabsFlag, "expand-tabs", "t", false, "Replace tabs with spaces before comparison.")
 }

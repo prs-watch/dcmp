@@ -1,48 +1,56 @@
-// `dcmp` のコアモジュール.
+// Core module of `dcmp`.
 package internal
 
 import "errors"
 
 /*
-LCSベースに検出したC/A/Dを判定の上Printする.
+printResult determines and prints C/A/D (Change/Add/Delete) based on LCS.
+Parameters:
+  - bf: Before file lines
+  - af: After file lines
+  - briefFlag: If true, only report if files differ
+  - identicalFlag: If true, only report if files are identical
+  - colorMode: Color output mode (auto/always/never)
+
+Returns an error if there's an issue with color mode or if files differ with briefFlag.
 */
 func printResult(bf []string, af []string, briefFlag bool, identicalFlag bool, colorMode string) error {
-	// Print時のcolorModeの適用
+	// Apply colorMode for printing
 	err := ApplyColorMode(colorMode)
 	if err != nil {
 		return err
 	}
 
-	// LCSペアの取得
+	// Get LCS pairs
 	pairs := GetLcsPairs(bf, af)
 
-	// 完全一致か判定
+	// Check if files are identical
 	if len(pairs) == len(bf) && len(pairs) == len(af) {
 		if identicalFlag {
 			handleIdentical()
 		}
 		return nil
 	} else {
-		// -q, --briefの場合出力の上エラー返却
+		// For -q, --brief, output and return error
 		if briefFlag {
 			handleBrief()
 			return errors.New("")
 		}
 	}
 
-	// 未処理行. 初期は1行目からスタート.
+	// Unprocessed lines. Start from line 1 initially.
 	bui, aui := 1, 1
 
-	// 一致行ペアを走査してC/A/Dをチェック.
+	// Scan matching line pairs and check C/A/D.
 	for _, p := range pairs {
-		// 一致行ペア
+		// Matching line pair
 		bmi, ami := p[0], p[1]
 
-		// 未処理行と一致行のポジション確認. 一致行より手前にあれば未処理として判定.
+		// Check position of unprocessed and matching lines. If before matching line, treat as unprocessed.
 		isbu := bui <= bmi-1
 		isau := aui <= ami-1
 
-		// C/A/Dを判定.
+		// Determine C/A/D.
 		switch {
 		case isbu && isau:
 			handleChange(bui, bmi, bf, aui, ami, af)
@@ -51,15 +59,15 @@ func printResult(bf []string, af []string, briefFlag bool, identicalFlag bool, c
 		case isau:
 			handleAdd(aui, ami, af)
 		default:
-			// 一致行は処理無し.
+			// No processing for matching lines.
 		}
 
-		// 走査済行分だけincrementする.
+		// Increment by scanned lines.
 		bui = bmi + 1
 		aui = ami + 1
 	}
 
-	// 末行だけ処理が漏れるため個別にハンドリング.
+	// Handle last lines separately as they may be missed.
 	bEnd, aEnd := len(bf), len(af)
 	isbu := bui <= bEnd
 	isau := aui <= aEnd
@@ -72,14 +80,21 @@ func printResult(bf []string, af []string, briefFlag bool, identicalFlag bool, c
 	case isau:
 		handleAdd(aui, aEnd+1, af)
 	default:
-		// 一致行は処理無し.
+		// No processing for matching lines.
 	}
 
 	return nil
 }
 
 /*
-Change箇所の行情報取得とPrint.
+handleChange extracts line information for Change locations and prints them.
+Parameters:
+  - bui: Before unprocessed index (start)
+  - bmi: Before match index (end)
+  - bf: Before file lines
+  - aui: After unprocessed index (start)
+  - ami: After match index (end)
+  - af: After file lines
 */
 func handleChange(bui int, bmi int, bf []string, aui int, ami int, af []string) {
 	var bct []string
@@ -94,7 +109,11 @@ func handleChange(bui int, bmi int, bf []string, aui int, ami int, af []string) 
 }
 
 /*
-Delete箇所の行情報取得とPrint.
+handleDelete extracts line information for Delete locations and prints them.
+Parameters:
+  - bui: Before unprocessed index (start)
+  - bmi: Before match index (end)
+  - bf: Before file lines
 */
 func handleDelete(bui int, bmi int, bf []string) {
 	var bct []string
@@ -105,7 +124,11 @@ func handleDelete(bui int, bmi int, bf []string) {
 }
 
 /*
-Add箇所の行情報取得とPrint.
+handleAdd extracts line information for Add locations and prints them.
+Parameters:
+  - aui: After unprocessed index (start)
+  - ami: After match index (end)
+  - af: After file lines
 */
 func handleAdd(aui int, ami int, af []string) {
 	var act []string
@@ -116,21 +139,36 @@ func handleAdd(aui int, ami int, af []string) {
 }
 
 /*
--q, --brief時に差分が検知された場合のPrint.
+handleBrief prints message when difference is detected with -q, --brief option.
 */
 func handleBrief() {
 	PrintBrief()
 }
 
 /*
--s, --report-identical-files時に同一ファイルであった場合のPrint.
+handleIdentical prints message when files are identical with -s, --report-identical-files option.
 */
 func handleIdentical() {
 	PrintIdentical()
 }
 
 /*
-モジュールエントリポイント. 2ファイルパスをinputに差分情報をPrintする.
+Execute is the module entry point that compares two files and prints difference information.
+Parameters:
+  - bfpath: Path to the before file
+  - afpath: Path to the after file
+  - briefFlag: If true, only report if files differ (-q, --brief)
+  - identicalFlag: If true, only report if files are identical (-s, --report-identical-files)
+  - ignoreBlankFlag: If true, ignore blank lines (-B, --ignore-blank-lines)
+  - ignoreCaseFlag: If true, ignore case differences (-i, --ignore-case)
+  - ignoreSpaceFlag: If true, ignore whitespace changes (-b, --ignore-space-change)
+  - ignoreAllSpaceFlag: If true, ignore all whitespace (-w, --ignore-all-space)
+  - colorMode: Color output mode: auto/always/never (--color)
+  - ignoreCrFlag: If true, ignore trailing CR (--strip-trailing-cr)
+  - ignoreMatchingLines: Regular expressions for lines to ignore (-I, --ignore-matching-lines)
+  - expandTabsFlag: If true, replace tabs with spaces before comparison (-t, --expand-tabs)
+
+Returns an error if file reading fails or if differences are found with briefFlag.
 */
 func Execute(
 	bfpath string,
