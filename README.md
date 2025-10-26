@@ -164,6 +164,101 @@ The output follows this format for detected changes:
 - **I/O Module** (`internal/io.go`): Handles file reading with various filters
 - **Command Module** (`cmd/root.go`): Cobra-based CLI interface
 
+## Testing
+
+### Test Structure
+
+`dcmp` uses black-box testing to verify command-line option behavior. Tests are located in `internal/dcmp_test.go` and use data-driven test cases under `internal/testdata/`.
+
+#### Directory Structure
+
+```
+internal/
+├── dcmp_test.go           # Main test file
+└── testdata/              # Test data for each option
+    ├── no-options/        # Basic diff without options
+    │   ├── a.txt          # Before file
+    │   ├── b.txt          # After file
+    │   └── expected.txt   # Expected output
+    ├── brief/             # -q, --brief
+    ├── report-identical-files/  # -s, --report-identical-files
+    ├── ignore-blank-lines/      # -B, --ignore-blank-lines
+    ├── ignore-case/             # -i, --ignore-case
+    ├── ignore-space-change/     # -b, --ignore-space-change
+    ├── ignore-all-space/        # -w, --ignore-all-space
+    ├── strip-trailing-cr/       # --strip-trailing-cr
+    ├── ignore-matching-lines/   # -I, --ignore-matching-lines
+    └── expand-tabs/             # -t, --expand-tabs
+```
+
+Each test case directory contains:
+- `a.txt`: Before file (input)
+- `b.txt`: After file (input)
+- `expected.txt`: Expected output when comparing with the specific option
+
+### Running Tests
+
+```bash
+# Run all tests
+go test ./internal
+
+# Run tests with verbose output
+go test ./internal -v
+
+# Run a specific test case
+go test ./internal -v -run TestExecute/brief
+```
+
+### Adding New Tests
+
+When adding a new command-line option or modifying existing behavior:
+
+1. **Create a test directory** under `internal/testdata/[option-name]/`
+
+2. **Create test files**:
+   - `a.txt`: Before file with content that demonstrates the option
+   - `b.txt`: After file with appropriate differences
+   - `expected.txt`: Expected output (use `--color=never` when generating)
+
+3. **Generate expected output**:
+   ```bash
+   go run main.go internal/testdata/[option-name]/a.txt \
+                  internal/testdata/[option-name]/b.txt \
+                  [your-option] --color=never > internal/testdata/[option-name]/expected.txt
+   ```
+
+4. **Verify line endings**: Ensure `expected.txt` uses LF (`\n`), not CRLF (`\r\n`)
+   ```bash
+   dos2unix internal/testdata/[option-name]/expected.txt
+   ```
+
+5. **Add the test case** to the `cases` array in `internal/dcmp_test.go`:
+   ```go
+   var cases = []string{
+       // ... existing cases ...
+       "your-new-option",
+   }
+   ```
+
+6. **Add option flag logic** in `TestExecute`:
+   ```go
+   if tc == "your-new-option" {
+       yourNewOptionFlag = true
+   }
+   ```
+
+7. **Run the test** to verify:
+   ```bash
+   go test ./internal -v -run TestExecute/your-new-option
+   ```
+
+### Test Guidelines
+
+- **Black-box testing**: Tests verify external behavior only, not internal implementation
+- **Data-driven**: Each option has dedicated test data to ensure isolation
+- **Reproducible**: Expected outputs are version-controlled for consistency
+- **No color codes**: Always use `--color=never` when generating expected outputs to avoid ANSI escape sequences in test files
+
 ## License
 
 See [LICENSE](LICENSE) file for details.
